@@ -137,6 +137,7 @@
   ;; need statistics of keyfreq asap
   (require-init 'init-keyfreq)
   (require-init 'init-httpd)
+;;  (require-init 'init-eshell)
 
   ;; projectile costs 7% startup time
 
@@ -160,6 +161,7 @@
                                init-pomodoro
                                init-dired
                                init-artbollocks-mode
+                               init-eshell ;;kimura
                                init-semantic))
   (idle-require-mode 1) ;; starts loading
   ;; }}
