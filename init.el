@@ -189,3 +189,10 @@
 ;;; no-byte-compile: t
 ;;; End:
 (put 'erase-buffer 'disabled nil)
+
+;; kimura custom -----------------------------------------------------------
+;; setup default color theme
+;; Please note the color theme's name is "molokai"
+(when (or (display-graphic-p)
+          (string-match-p "256color"(getenv "TERM")))
+  (load-theme 'darkburn t))
