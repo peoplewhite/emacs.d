@@ -135,6 +135,7 @@
   ;; need statistics of keyfreq asap
   (require-init 'init-keyfreq)
   (require-init 'init-httpd)
+;;  (require-init 'init-eshell)
 
   ;; projectile costs 7% startup time
 
@@ -159,6 +160,7 @@
                                init-pomodoro
                                init-dired
                                init-artbollocks-mode
+                               init-eshell ;;kimura
                                init-semantic))
   (idle-require-mode 1) ;; starts loading
   ;; }}
@@ -186,3 +188,10 @@
 ;;; no-byte-compile: t
 ;;; End:
 (put 'erase-buffer 'disabled nil)
+
+;; kimura custom -----------------------------------------------------------
+;; setup default color theme
+;; Please note the color theme's name is "molokai"
+(when (or (display-graphic-p)
+          (string-match-p "256color"(getenv "TERM")))
+  (load-theme 'darkburn t))
