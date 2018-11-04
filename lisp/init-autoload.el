@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 (autoload 'gmail2bbdb-import-file "gmail2bbdb" "" t)
 (autoload 'ivy-recentf "ivy" "" t)
 (autoload 'ivy-read "ivy")
@@ -53,7 +54,6 @@
 (autoload 'srt-convert-sub-to-srt "subtitles" "" t)
 (autoload 'fastdef-insert "fastdef" nil t)
 (autoload 'fastdef-insert-from-history "fastdef" nil t)
-(autoload 'moz-minor-mode "moz" "Mozilla Minor and Inferior Mozilla Modes" t)
 (autoload 'org-mime-htmlize "org-mime" nil t)
 (autoload 'org-mime-org-buffer-htmlize "org-mime" nil t)
 (autoload 'org-mime-org-subtree-htmlize "org-mime" nil t)

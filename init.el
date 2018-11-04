@@ -1,18 +1,13 @@
-;; -*- coding: utf-8 -*-
-;(defvar best-gc-cons-threshold gc-cons-threshold "Best default gc threshold value. Should't be too big.")
+;; -*- coding: utf-8; lexical-binding: t; -*-
 
-
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
-(package-initialize)
-
-(let ((minver "24.3"))
+(let* ((minver "24.4"))
   (when (version< emacs-version minver)
     (error "This config requires Emacs v%s or higher" minver)))
 
-(defvar best-gc-cons-threshold 4000000 "Best default gc threshold value. Should't be too big.")
+(defvar best-gc-cons-threshold
+  4000000
+  "Best default gc threshold value.  Should NOT be too big!")
+
 ;; don't GC during startup to save time
 (setq gc-cons-threshold most-positive-fixnum)
 
@@ -48,12 +43,19 @@
 ;; Emacs 25 does gc too frequently
 (when *emacs25*
   ;; (setq garbage-collection-messages t) ; for debug
-  (setq gc-cons-threshold (* 64 1024 1024) )
+  (setq best-gc-cons-threshold (* 64 1024 1024))
   (setq gc-cons-percentage 0.5)
   (run-with-idle-timer 5 t #'garbage-collect))
 
 (defmacro local-require (pkg)
-  `(load (file-truename (format "~/.emacs.d/site-lisp/%s/%s" ,pkg ,pkg))))
+  `(unless (featurep ,pkg)
+     (cond
+      ((eq ,pkg 'bookmark+)
+       (load (file-truename (format "~/.emacs.d/site-lisp/bookmark-plus/%s" ,pkg))))
+      ((eq ,pkg 'go-mode-load)
+       (load (file-truename (format "~/.emacs.d/site-lisp/go-mode/%s" ,pkg))))
+      (t
+       (load (file-truename (format "~/.emacs.d/site-lisp/%s/%s" ,pkg ,pkg)))))))
 
 (defmacro require-init (pkg)
   `(load (file-truename (format "~/.emacs.d/lisp/%s" ,pkg))))
@@ -69,29 +71,17 @@
 ;; ("\\`/[^/|:][^/|]*:" . tramp-file-name-handler)
 ;; ("\\`/:" . file-name-non-special))
 ;; Which means on every .el and .elc file loaded during start up, it has to runs those regexps against the filename.
-(let ((file-name-handler-alist nil))
+(let* ((file-name-handler-alist nil))
+  ;; `package-initialize' takes 35% of startup time
+  ;; need check https://github.com/hlissner/doom-emacs/wiki/FAQ#how-is-dooms-startup-so-fast for solution
+  (when (version< emacs-version "27.0") (package-initialize))
+
   (require-init 'init-autoload)
   (require-init 'init-modeline)
-  ;; (require 'cl-lib) ; it's built in since Emacs v24.3
-  (require-init 'init-compat)
   (require-init 'init-utils)
-
-  ;; Windows configuration, assuming that cygwin is installed at "c:/cygwin"
-  ;; (condition-case nil
-  ;;     (when *win64*
-  ;;       ;; (setq cygwin-mount-cygwin-bin-directory "c:/cygwin/bin")
-  ;;       (setq cygwin-mount-cygwin-bin-directory "c:/cygwin64/bin")
-  ;;       (require 'setup-cygwin)
-  ;;       ;; better to set HOME env in GUI
-  ;;       ;; (setenv "HOME" "c:/cygwin/home/someuser")
-  ;;       )
-  ;;   (error
-  ;;    (message "setup-cygwin failed, continue anyway")
-  ;;    ))
   (require-init 'init-elpa)
   (require-init 'init-exec-path) ;; Set up $PATH
-  ;; any file use flyspell should be initialized after init-spelling.el
-  ;; actually, I don't know which major-mode use flyspell.
+  ;; Any file use flyspell should be initialized after init-spelling.el
   (require-init 'init-spelling)
   (require-init 'init-gui-frames)
   (require-init 'init-uniquify)
@@ -104,7 +94,7 @@
   (require-init 'init-javascript)
   (require-init 'init-org)
   (require-init 'init-css)
-  (require-init 'init-python-mode)
+  (require-init 'init-python)
   (require-init 'init-haskell)
   (require-init 'init-ruby-mode)
   (require-init 'init-lisp)
@@ -116,14 +106,12 @@
   (require-init 'init-linum-mode)
   (require-init 'init-git) ;; git-gutter should be enabled after `display-line-numbers-mode' turned on
   ;; (require-init 'init-gist)
-  (require-init 'init-moz)
   (require-init 'init-gtags)
   ;; init-evil dependent on init-clipboard
   (require-init 'init-clipboard)
   ;; use evil mode (vi key binding)
   (require-init 'init-evil)
   (require-init 'init-multiple-cursors)
-  (require-init 'init-sh)
   (require-init 'init-ctags)
   (require-init 'init-bbdb)
   (require-init 'init-gnus)
@@ -145,6 +133,7 @@
 
   (require-init 'init-emacs-w3m)
   (require-init 'init-hydra)
+  (require-init 'init-shackle)
 
   (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
   ;; {{ idle require other stuff
@@ -153,7 +142,6 @@
   (setq idle-require-symbols '(init-perforce
                                init-slime
                                init-misc-lazy
-                               init-which-func
                                init-fonts
                                init-hs-minor-mode
                                init-writting
@@ -176,12 +164,12 @@
   (require-init 'init-site-lisp)
 
   ;; my personal setup, other major-mode specific setup need it.
-  ;; It's dependent on init-site-lisp.el
-  (if (file-exists-p "~/.custom.el") (load-file "~/.custom.el")))
+  ;; It's dependent on "~/.emacs.d/site-lisp/*.el"
+  (if (file-exists-p "~/.custom.el") (load-file "~/.custom.el"))
 
-;; @see https://www.reddit.com/r/emacs/comments/4q4ixw/how_to_forbid_emacs_to_touch_configuration_files/
-(setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
-(load custom-file 'noerror)
+  ;; @see https://www.reddit.com/r/emacs/comments/4q4ixw/how_to_forbid_emacs_to_touch_configuration_files/
+  (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
+  (load custom-file 'noerror))
 
 (setq gc-cons-threshold best-gc-cons-threshold)
 ;;; Local Variables:
