@@ -48,6 +48,7 @@
   ;; (setq garbage-collection-messages t) ; for debug
   (setq best-gc-cons-threshold (* 64 1024 1024))
   (setq gc-cons-percentage 0.5)
+
   (run-with-idle-timer 5 t #'garbage-collect))
 
 (defmacro local-require (pkg)
@@ -169,4 +170,4 @@
 ;; Please note the color theme's name is "molokai"
 (when (or (display-graphic-p)
           (string-match-p "256color"(getenv "TERM")))
-  (load-theme 'darkburn t))
+  (load-theme 'manoj-dark t))
