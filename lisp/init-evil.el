@@ -37,7 +37,6 @@
 (global-evil-visualstar-mode t)
 ;; }}
 
-
 ;; ffip-diff-mode (read only) evil setup
 (defun ffip-diff-mode-hook-setup ()
   (evil-local-set-key 'normal "K" 'diff-hunk-prev)
@@ -412,10 +411,11 @@ If the character before and after CH is space or tab, CH is NOT slash"
        "tfm" 'toggle-frame-maximized
        "ti" 'fastdef-insert
        "th" 'fastdef-insert-from-history
-       ;; "ci" 'evilnc-comment-or-uncomment-lines
-       ;; "cl" 'evilnc-comment-or-uncomment-to-the-line
-       ;; "cc" 'evilnc-copy-and-comment-lines
-       ;; "cp" 'evilnc-comment-or-uncomment-paragraphs
+       "ci" 'evilnc-comment-or-uncomment-lines
+       "cl" 'evilnc-comment-or-uncomment-to-the-line
+       "cc" 'evilnc-copy-and-comment-lines
+       "cp" 'my-evilnc-comment-or-uncomment-paragraphs
+       "ct" 'evilnc-comment-or-uncomment-html-tag ; evil-nerd-commenter v3.3.0 required
        "ic" 'my-imenu-comments
        "epy" 'emmet-expand-yas
        "epl" 'emmet-expand-line
@@ -770,7 +770,31 @@ If the character before and after CH is space or tab, CH is NOT slash"
                 (set-face-foreground 'mode-line (cdr color))))))
 
 ;; {{ evil-nerd-commenter
-(evilnc-default-hotkeys)
+(evilnc-default-hotkeys t)
+
+(defun my-current-line-html-p (paragraph-region)
+  (let* ((line (buffer-substring-no-properties (line-beginning-position)
+                                               (line-end-position)))
+         (re (format "^[ \t]*\\(%s\\)?[ \t]*</?[a-zA-Z]+"
+                     (regexp-quote evilnc-html-comment-start))))
+    ;; current paragraph does contain html tag
+    (if (and (>= (point) (car paragraph-region))
+             (string-match-p re line))
+        t)))
+
+(defun my-evilnc-comment-or-uncomment-paragraphs (&optional num)
+  "Comment or uncomment NUM paragraphs which might contain html tags."
+  (interactive "p")
+  (unless (featurep 'evil-nerd-commenter) (require 'evil-nerd-commenter))
+  (let* ((paragraph-region (evilnc--get-one-paragraph-region))
+         (html-p (or (save-excursion
+                       (sgml-skip-tag-backward 1)
+                       (my-current-line-html-p paragraph-region))
+                     (save-excursion
+                       (sgml-skip-tag-forward 1)
+                       (my-current-line-html-p paragraph-region)))))
+    (if html-p (evilnc-comment-or-uncomment-html-paragraphs num)
+      (evilnc-comment-or-uncomment-paragraphs num))))
 
 (defun my-imenu-comments ()
   "Imenu display comments."
@@ -816,6 +840,10 @@ If the character before and after CH is space or tab, CH is NOT slash"
 (evil-find-char-pinyin-mode 1)
 ;; }}
 
+;; {{ Port of vim-textobj-syntax. It provides evil text objects for consecutive items with same syntax highlig
+(require 'evil-textobj-syntax)
+;; }}
+
 ;; {{ evil-args
 ;; bind evil-args text objects
 (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
@@ -843,7 +871,8 @@ If the character before and after CH is space or tab, CH is NOT slash"
      (setq evil-symbol-word-search t)
 
      ;; @see https://emacs.stackexchange.com/questions/9583/how-to-treat-underscore-as-part-of-the-word
-     (defalias #'forward-evil-word #'forward-evil-symbol)
+     ;; uncomment below line to make "dw" has exact same behaviour in evil as as in vim
+     ;; (defalias #'forward-evil-word #'forward-evil-symbol)
 
      ;; @see https://bitbucket.org/lyro/evil/issue/511/let-certain-minor-modes-key-bindings
      (defmacro adjust-major-mode-keymap-with-evil (m &optional r)
