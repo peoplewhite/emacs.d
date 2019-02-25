@@ -170,3 +170,10 @@
 (when (or (display-graphic-p)
           (string-match-p "256color"(getenv "TERM")))
   (load-theme 'manoj-dark t))
+
+
+;; setup slime
+(setq inferior-lisp-program "/usr/local/bin/sbcl")
+(setq slime-contribs '(slime-fancy))
+(require 'slime-autoloads)
+

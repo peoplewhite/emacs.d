@@ -202,7 +202,11 @@ If use-indirect-buffer is not nil, use `indirect-buffer' to hold the widen conte
     ;; display wrapped lines instead of truncated lines
     (setq truncate-lines nil)
     (setq word-wrap t)))
+
 (add-hook 'org-mode-hook 'org-mode-hook-setup)
+
+;; kimura -> org-bullets-mode
+(add-hook 'org-mode-hook 'org-bullets-mode)
 
 (defadvice org-open-at-point (around org-open-at-point-choose-browser activate)
   "`C-u M-x org-open-at-point` open link with `browse-url-generic-program'"
@@ -253,5 +257,8 @@ If use-indirect-buffer is not nil, use `indirect-buffer' to hold the widen conte
   "Better org-mode agenda view."
   (interactive "P")
   (org-agenda arg "n"))
+
+;; kimura -> org-bullets-mode
+;;(setq org-bullets-mode t)
 
 (provide 'init-org)
