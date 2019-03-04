@@ -46,32 +46,10 @@
   ("S" (progn (emms-shuffle) (emms-random)))
   ("q" nil))
 
-(defhydra multiple-cursors-hydra (:color green :hint nil)
-  "
-^Up^            ^Down^          ^Other^
-----------------------------------------------
-[_p_]   Next    [_n_]   Next    [_l_] Edit lines
-[_P_]   Skip    [_N_]   Skip    [_a_] Mark all
-[_M-p_] Unmark  [_M-n_] Unmark  [_r_] Mark by regexp
-^ ^             ^ ^             [_q_] Quit
-"
-  ("l" mc/edit-lines :exit t)
-  ("a" mc/mark-all-like-this :exit t)
-  ("n" mc/mark-next-like-this)
-  ("N" mc/skip-to-next-like-this)
-  ("M-n" mc/unmark-next-like-this)
-  ("p" mc/mark-previous-like-this)
-  ("P" mc/skip-to-previous-like-this)
-  ("M-p" mc/unmark-previous-like-this)
-  ("r" mc/mark-all-in-region-regexp :exit t)
-  ("q" nil))
-
 ;; Because in message-mode/article-mode we've already use `y' as hotkey
 (global-set-key (kbd "C-c C-y") 'hydra-launcher/body)
-(global-set-key (kbd "C-c C-h") 'multiple-cursors-hydra/body)
 (defun org-mode-hook-hydra-setup ()
-  (local-set-key (kbd "C-c C-y") 'hydra-launcher/body)
-  (local-set-key (kbd "C-c C-h") 'multiple-cursors-hydra/body))
+  (local-set-key (kbd "C-c C-y") 'hydra-launcher/body))
 (add-hook 'org-mode-hook 'org-mode-hook-hydra-setup)
 
 ;; {{ mail
@@ -153,6 +131,16 @@
 ;; {{ dired
 (eval-after-load 'dired
   '(progn
+     (defun my-replace-dired-base (base)
+       "Change file name in `wdired-mode'"
+       (let* ((fp (dired-file-name-at-point))
+              (fb (file-name-nondirectory fp))
+              (ext (file-name-extension fp))
+              (dir (file-name-directory fp))
+              (nf (concat base "." ext)))
+         (when (yes-or-no-p (format "%s => %s at %s?"
+                                    fb nf dir))
+           (rename-file fp (concat dir nf)))))
      (defun my-copy-file-info (fn)
        (message "%s => clipboard & yank ring"
                 (copy-yank-str (funcall fn (dired-file-name-at-point)))))
@@ -165,6 +153,7 @@
 [_rr_] Rename file  [_bb_] Base
 [_ff_] Find file    [_dd_] DIR
 [_mk_] New DIR
+[_rb_] Replace base
 ^^                  ^^           [_q_]  Quit
 "
        ("sa" (shell-command "periscope.py -l en *.mkv *.mp4 *.avi &"))
@@ -175,6 +164,7 @@
        ("nn" (my-copy-file-info 'file-name-nondirectory))
        ("bb" (my-copy-file-info 'file-name-base))
        ("dd" (my-copy-file-info 'file-name-directory))
+       ("rb" (my-replace-dired-base (car kill-ring)))
        ("C" dired-do-copy)
        ("mv" diredp-do-move-recursive)
        ("cf"find-file)
