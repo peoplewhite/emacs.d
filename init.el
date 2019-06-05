@@ -170,10 +170,9 @@
 
 ;; kimura custom -----------------------------------------------------------
 ;; setup default color theme
-;; Please note the color theme's name is "molokai"
 (when (or (display-graphic-p)
           (string-match-p "256color"(getenv "TERM")))
-  (load-theme 'manoj-dark t))
+  (load-theme 'gruvbox-dark-hard t))
 
 
 ;; setup slime
