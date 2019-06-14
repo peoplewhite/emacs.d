@@ -29,6 +29,7 @@
   - [[#default-terminal-shell][Default terminal shell]]
   - [[#override-default-setup][Override default setup]]
   - [[#code-navigation-and-auto-completion][Code navigation and auto-completion]]
+  - [[#use-m-key-for-evil-matchit][Use "m" key for "evil-matchit"]]
   - [[#color-theme][Color theme]]
   - [[#grepreplace-text-in-project][Grep/Replace text in project]]
   - [[#hydraswipercounselivy][Hydra/Swiper/Counsel/Ivy]]
@@ -170,7 +171,7 @@ ACT
 
 Hunspell's default personal English dictionary is =$HOME/.hunspell_en_US=. The file format is same as aspell.
 **** tidy
-- Required by =web-mode= for syntax check and =tidy.el= html formatting
+- Required by =web-mode= for syntax check. It's also required by =tidy.el= for html formatting
 **** identify from [[http://www.imagemagick.org/][ImageMagick]]
 - Required by =org-mode= to export org file to odt contain images
 **** zip and unzip
@@ -179,7 +180,7 @@ Hunspell's default personal English dictionary is =$HOME/.hunspell_en_US=. The f
 - Install =node.js= through OS package manager, then =npm install -g jshint=
 - Required by js-mode
 - I use js2-mode which does NOT need jshint
-**** xsel
+**** xsel or xclip
 - Required by my clipboard command =copy-to-x-clipboard= and =paste-from-x-clipboard= under Linux
 **** [[http://www.cmake.org][CMake]]
 - Required by =cpputils-cmake=
@@ -312,6 +313,18 @@ To enable code auto-completion, =M-x counsel-etags-scan-code= at least once.
 Optionally, you can add =(add-hook 'after-save-hook 'counsel-etags-virtual-update-tags)= into your =.emacs= to automatically update tags file.
 
 No further setup is required.
+** Use "m" key for "evil-matchit"
+The default keybinding of =evil-matchit= is =%=. Its evil text object name is also =%=.
+
+You can use =m= instead of =%= as new keybinding and the text object name from =evil-matchit=.
+
+It's just one liner in =~/.custom.el=,
+#+begin_src javascript
+;; evil-matchit 2.3.0 is required
+(setq my-use-m-for-matchit t)
+#+end_src
+
+Use =,m= for =evil-set-marker= whose original keybinding is =m=.
 ** Color theme
 *** Preview color theme
 Check [[https://emacsthemes.com/]].
@@ -338,7 +351,7 @@ True color requires a little setup.
 
 You need install the terminal supporting true color. See [[https://gist.github.com/XVilka/8346728][this list]]. I recommend [[https://mintty.github.io/][Mintty]] on Cygwin, [[https://gnometerminator.blogspot.com/p/introduction.html][Terminator]] on Linux, [[https://www.iterm2.com/][iTerm2]] on macOS.
 
-Only Emacs 26 support true color.
+Only Emacs 26 supports true color.
 
 Follow [[https://www.gnu.org/software/emacs/manual/html_node/efaq/Colors-on-a-TTY.html][Emacs manual]] to set up and start Emacs.
 
