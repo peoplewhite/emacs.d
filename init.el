@@ -55,8 +55,6 @@
   `(unless (featurep ,pkg)
      (load (expand-file-name
              (cond
-               ((eq ,pkg 'bookmark+)
-                (format "~/.emacs.d/site-lisp/bookmark-plus/%s" ,pkg))
                ((eq ,pkg 'go-mode-load)
                 (format "~/.emacs.d/site-lisp/go-mode/%s" ,pkg))
                (t
@@ -107,7 +105,6 @@
   (require 'init-lisp)
   (require 'init-elisp)
   (require 'init-yasnippet)
-  ;; Use bookmark instead
   (require 'init-cc-mode)
   (require 'init-gud)
   (require 'init-linum-mode)
