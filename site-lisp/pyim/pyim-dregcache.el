@@ -45,6 +45,17 @@
         (insert-file-contents file)
         (buffer-string)))))
 
+(defun pyim-dregcache-sort-words (words-list)
+  "对 WORDS-LIST 排序，词频大的排在前面.
+
+排序使用 `pyim-dregcache-iword2count' 中记录的词频信息"
+  (sort words-list
+        #'(lambda (a b)
+            (let ((a (car (split-string a ":")))
+                  (b (car (split-string b ":"))))
+              (> (or (gethash a pyim-dregcache-iword2count) 0)
+                 (or (gethash b pyim-dregcache-iword2count) 0))))))
+
 (defun pyim-dregcache-sort-icode2word ()
   "对个人词库排序."
   (setq pyim-dregcache-icode2word
@@ -224,12 +235,15 @@ DCACHE-LIST 只是符号而已,并不代表真实的缓存数据."
             (cond
              ((string-match "^[^ ]+$" word)
               ;; 单个词
-              (add-to-list 'result word t))
+              (push word result))
              (t
               ;; 多个字
-              (setq result (append result (split-string word " +")))))
+              (setq result (append (nreverse (split-string word " +")) result))))
             ;; 继续搜索
             (setq start (+ start 2 (length code) (length word))))))
+      ;; `push' plus `nreverse' is more efficient than `add-to-list'
+      ;; Many examples exist in Emacs' own code
+      (setq result (nreverse result))
       `(,@result ,@(pyim-pinyin2cchar-get code t t)))))
 
 (defun pyim-dregcache-update-personal-words (&optional force)
@@ -259,9 +273,7 @@ DCACHE-LIST 只是符号而已,并不代表真实的缓存数据."
    ;; dregcache 引擎也需要词频信息，第一次使用 dregcache 引擎的时候，
    ;; 自动导入 dhashcache 引擎的词频信息，以后两个引擎的词频信息就
    ;; 完全分开了。
-   (let ((file (concat (file-name-as-directory pyim-dcache-directory)
-                       "pyim-dhashcache-iword2count")))
-     (pyim-dcache-get-value-from-file file))))
+   (pyim-dcache-get-variable 'pyim-dhashcache-iword2count)))
 
 (defun pyim-dregcache-icode2word-formatted ()
   "个人词库格式化以便存入文件."
@@ -294,8 +306,15 @@ DCACHE-LIST 只是符号而已,并不代表真实的缓存数据."
       (puthash word new-value pyim-dregcache-iword2count))))
 
 (defun pyim-dregcache-delete-word-1 (word)
-  "TODO"
-  )
+  "将中文词条 WORD 从个人词库中删除."
+  (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
+    ;; 从个人缓存删除词条
+    (dolist (py pinyins)
+      (unless (pyim-string-match-p "[^ a-z-]" py)
+        (setq pyim-dregcache-icode2word
+              (delete (concat py " " word) pyim-dregcache-icode2word)))))
+  ;; 删除对应词条的词频
+  (remhash word pyim-dregcache-iword2count))
 
 (defun pyim-dregcache-insert-word-into-icode2word (word code prepend)
   "保存个人词到缓存."
@@ -334,8 +353,9 @@ DCACHE-LIST 只是符号而已,并不代表真实的缓存数据."
     (when pyim-dregcache-icode2word
       (dolist (line pyim-dregcache-icode2word)
         (when (string-match pattern line)
-          (add-to-list 'rlt (nth 1 (split-string line " ")) t))))
-    rlt))
+          (push (nth 1 (split-string line " ")) rlt))))
+    ;; `push' plus `nreverse' is more efficient than `add-to-list'
+    (nreverse rlt)))
 
 (defun pyim-dregcache-get-icode2word (code)
   "以 CODE 搜索个人词.  正则表达式搜索词库,不需要为联想词开单独缓存."
