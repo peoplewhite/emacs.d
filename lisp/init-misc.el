@@ -86,14 +86,9 @@
   (setq-default save-place t)))
 
 ;; {{ find-file-in-project (ffip)
-(defun my-git-versions ()
-  (let* ((git-cmd (concat "git --no-pager log --date=short --pretty=format:'%h|%ad|%s|%an' "
-                          buffer-file-name)))
-    (nconc (nonempty-lines (shell-command-to-string "git branch --no-color --all"))
-           (nonempty-lines (shell-command-to-string git-cmd)))))
-
-
-(setq ffip-match-path-instead-of-filename t)
+(eval-after-load 'find-file-in-project
+  '(progn
+     (setq ffip-match-path-instead-of-filename t)))
 
 (defun neotree-project-dir ()
   "Open NeoTree using the git root."
@@ -345,6 +340,7 @@ Keep the last num lines if argument num if given."
 ;; }}
 
 (defun my-multi-purpose-grep (n)
+  "Run different grep from N."
   (interactive "P")
   (cond
    ((not n)
@@ -852,8 +848,7 @@ If no region is selected. You will be asked to use `kill-ring' or clipboard inst
 
 (defun vc-msg-show-code-setup ()
   "Use `ffip-diff-mode' instead of `diff-mode'."
-  (unless (featurep 'find-file-in-project)
-    (require 'find-file-in-project))
+  (unless (featurep 'find-file-in-project) (require 'find-file-in-project))
   (ffip-diff-mode))
 
 (add-hook 'vc-msg-show-code-hook 'vc-msg-show-code-setup)
@@ -1269,19 +1264,22 @@ Including indent-buffer, which should not be called automatically on save."
 
 ;; {{ easygpg setup
 ;; @see http://www.emacswiki.org/emacs/EasyPG#toc4
-(defadvice epg--start (around advice-epg-disable-agent disable)
-  "Make `epg--start' not able to find a gpg-agent."
-  (let ((agent (getenv "GPG_AGENT_INFO")))
-    (setenv "GPG_AGENT_INFO" nil)
-    ad-do-it
-    (setenv "GPG_AGENT_INFO" agent)))
+(eval-after-load 'epg
+  '(progn
+     (defadvice epg--start (around advice-epg-disable-agent disable)
+       "Make `epg--start' not able to find a gpg-agent."
+       (let ((agent (getenv "GPG_AGENT_INFO")))
+         (setenv "GPG_AGENT_INFO" nil)
+         ad-do-it
+         (setenv "GPG_AGENT_INFO" agent)))
 
-(unless (string-match-p "^gpg (GnuPG) 1.4"
-                        (shell-command-to-string (format "%s --version" epg-gpg-program)))
+     (unless (string-match-p "^gpg (GnuPG) 1.4"
+                             (shell-command-to-string (format "%s --version" epg-gpg-program)))
 
-  ;; `apt-get install pinentry-tty` if using emacs-nox
-  ;; Create `~/.gnupg/gpg-agent.conf' container one line `pinentry-program /usr/bin/pinentry-curses`
-  (setq epa-pinentry-mode 'loopback))
+       ;; `apt-get install pinentry-tty` if using emacs-nox
+       ;; Create `~/.gnupg/gpg-agent.conf'. has one line
+       ;; `pinentry-program /usr/bin/pinentry-curses`
+       (setq epa-pinentry-mode 'loopback))))
 ;; }}
 
 ;; {{ show current function name in `mode-line'
@@ -1355,15 +1353,24 @@ Including indent-buffer, which should not be called automatically on save."
 (add-hook 'nov-mode-hook 'nov-mode-hook-setup)
 ;; }}
 
+(defun line-number-at-position (pos)
+  "Returns the line number for position `POS'."
+  (save-restriction
+    (widen)
+    (save-excursion
+      (goto-char pos)
+      (+ 1 (count-lines (point-min) (line-beginning-position 1))))))
+
 (defun narrow-to-region-indirect-buffer-maybe (start end use-indirect-buffer)
   "Indirect buffer could multiple widen on same file."
   (if (region-active-p) (deactivate-mark))
   (if use-indirect-buffer
       (with-current-buffer (clone-indirect-buffer
                             (generate-new-buffer-name
-                             (concat (buffer-name) "-indirect-"
-                                     (number-to-string start) "-"
-                                     (number-to-string end)))
+                             (format "%s-indirect-:%s-:%s"
+                                     (buffer-name)
+                                     (line-number-at-position start)
+                                     (line-number-at-position end)))
                             'display)
         (narrow-to-region start end)
         (goto-char (point-min)))
@@ -1407,5 +1414,13 @@ If use-indirect-buffer is not nil, use `indirect-buffer' to hold the widen conte
             (auto-fill-mode 1)
             (if (eq window-system 'x)
                 (font-lock-mode 1))))
+;; }}
+
+;; {{ wgrep setup
+(eval-after-load 'wgrep
+  '(progn
+     ;; save the change after wgrep finishes the job
+     (setq wgrep-auto-save-buffer t)
+     (setq wgrep-too-many-file-length 2024)))
 ;; }}
 (provide 'init-misc)
