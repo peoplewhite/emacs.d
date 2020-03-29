@@ -48,6 +48,7 @@
   ;; (setq garbage-collection-messages t) ; for debug
   (setq best-gc-cons-threshold (* 64 1024 1024))
   (setq gc-cons-percentage 0.5)
+
   (run-with-idle-timer 5 t #'garbage-collect))
 
 (defun require-init (pkg &optional maybe-disabled)
@@ -129,6 +130,7 @@
   (require-init 'init-keyfreq t)
   (require-init 'init-httpd t)
 
+
   ;; projectile costs 7% startup time
 
   ;; don't play with color-theme in light weight mode
@@ -178,3 +180,16 @@
 ;;; no-byte-compile: t
 ;;; End:
 (put 'erase-buffer 'disabled nil)
+
+;; kimura custom -----------------------------------------------------------
+;; setup default color theme
+(when (or (display-graphic-p)
+          (string-match-p "256color"(getenv "TERM")))
+  (load-theme 'gruvbox-dark-hard t))
+
+
+;; setup slime
+(setq inferior-lisp-program "/usr/local/bin/sbcl")
+(setq slime-contribs '(slime-fancy))
+(require 'slime-autoloads)
+
