@@ -130,16 +130,21 @@
 ;; don't let the cursor go into minibuffer prompt
 (setq minibuffer-prompt-properties (quote (read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt)))
 
+;; {{ comint-mode
 (eval-after-load 'comint
   '(progn
-     ;; But don't show trailing whitespace in REPL.
-     (add-hook 'comint-mode-hook
-               (lambda () (setq show-trailing-whitespace nil)))
      ;; Don't echo passwords when communicating with interactive programs:
      ;; Github prompt is like "Password for 'https://user@github.com/':"
      (setq comint-password-prompt-regexp
            (format "%s\\|^ *Password for .*: *$" comint-password-prompt-regexp))
      (add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)))
+(defun comint-mode-hook-setup ()
+  ;; look up shell command history
+  (local-set-key (kbd "M-n") 'counsel-shell-history)
+  ;; Don't show trailing whitespace in REPL.
+  (local-set-key (kbd "M-;") 'comment-dwim))
+(add-hook 'comint-mode-hook 'comint-mode-hook-setup)
+;; }}
 
 (global-set-key (kbd "M-x") 'counsel-M-x)
 (global-set-key (kbd "C-x C-m") 'counsel-M-x)
@@ -1265,6 +1270,28 @@ Including indent-buffer, which should not be called automatically on save."
 (setq which-key-allow-imprecise-window-fit t) ; performance
 (setq which-key-separator ":")
 (which-key-mode 1)
+;; }}
+
+;; {{ Answer Yes/No programmically when asked by `y-or-n-p'
+(defvar my-default-yes-no-answers nil
+    "Usage: (setq my-default-yes-no-answers '((t . \"question1\") (t . \"question2\")))).")
+(defadvice y-or-n-p (around y-or-n-p-hack activate)
+  (let* ((prompt (car (ad-get-args 0))))
+    (cond
+     ((and my-default-yes-no-answers
+           (listp my-default-yes-no-answers))
+      (let* ((i 0)
+             found
+             cand)
+        (while (and (setq cand (nth i my-default-yes-no-answers))
+                    (not found))
+          (when (string-match-p (cdr cand) prompt)
+            (setq found t)
+            (setq ad-return-value (car cand)))
+          (setq i (1+ i)))
+        (unless found ad-do-it)))
+     (t
+      ad-do-it))))
 ;; }}
 
 ;; {{ eldoc
