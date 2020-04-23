@@ -16,11 +16,14 @@
     auto-package-update
     nov
     bbdb
+    native-complete
+    flymake-shellcheck ; check shell script
+    company-native-complete
     js2-mode ; need new features
     git-timemachine ; stable version is broken when git rename file
     evil-textobj-syntax
     command-log-mode
-    lsp-mode ; stable version has performance issue
+    ;; lsp-mode ; stable version has performance issue, but unstable version sends too many warnings
     edit-server ; use Emacs to edit textarea in browser, need browser addon
     vimrc-mode
     rjsx-mode ; fixed the indent issue in jsx
@@ -232,7 +235,6 @@ PACKAGE is a symbol, VERSION is a vector as produced by `version-to-list', and
 (require-package 'fringe-helper)
 (require-package 'gitignore-mode)
 (require-package 'gitconfig-mode)
-(require-package 'gist)
 (require-package 'wgrep)
 (require-package 'request)
 (require-package 'lua-mode)
@@ -262,7 +264,6 @@ PACKAGE is a symbol, VERSION is a vector as produced by `version-to-list', and
 (require-package 'dsvn)
 (require-package 'git-timemachine)
 (require-package 'exec-path-from-shell)
-(require-package 'flymake-jslint)
 (require-package 'ivy)
 (require-package 'swiper)
 (require-package 'counsel) ; counsel => swiper => ivy
@@ -285,6 +286,7 @@ PACKAGE is a symbol, VERSION is a vector as produced by `version-to-list', and
 (require-package 'bbdb)
 (require-package 'pomodoro)
 (require-package 'flymake-lua)
+(require-package 'flymake-shellcheck)
 ;; rvm-open-gem to get gem's code
 (require-package 'rvm)
 ;; C-x r l to list bookmarks
@@ -298,6 +300,8 @@ PACKAGE is a symbol, VERSION is a vector as produced by `version-to-list', and
 (require-package 'yasnippet)
 (require-package 'yasnippet-snippets)
 (require-package 'company)
+(require-package 'native-complete)
+(require-package 'company-native-complete)
 (require-package 'company-c-headers)
 (require-package 'company-statistics)
 (require-package 'lsp-mode)
