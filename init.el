@@ -194,7 +194,7 @@
 ;; setup default color theme
 (when (or (display-graphic-p)
           (string-match-p "256color"(getenv "TERM")))
-  (load-theme 'gruvbox-dark-hard t))
+  (load-theme 'atom-one-dark t))
 
 
 ;; setup slime
