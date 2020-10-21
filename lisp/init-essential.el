@@ -192,12 +192,14 @@ If OTHER-SOURCE is 2, get keyword from `kill-ring'."
 
 (with-eval-after-load 'cliphist
   (defun cliphist-routine-before-insert-hack (&optional arg)
+    (ignore arg)
     (my-delete-selected-region))
   (advice-add 'cliphist-routine-before-insert :before #'cliphist-routine-before-insert-hack))
 
 ;; {{ Write backup files to its own directory
 ;; @see https://www.gnu.org/software/emacs/manual/html_node/tramp/Auto_002dsave-and-Backup.html
-(defvar my-binary-file-name-regexp "\\.\\(avi\\|wav\\|pdf\\|mp[34g]\\|mkv\\|exe\\|3gp\\|rmvb\\|rm\\)$"
+(defvar my-binary-file-name-regexp
+  "\\.\\(avi\\|wav\\|pdf\\|mp[34g]\\|mkv\\|exe\\|3gp\\|rmvb\\|rm\\|pyim\\|\\.recentf\\)$"
   "Is binary file name?")
 
 (setq backup-enable-predicate
@@ -219,15 +221,15 @@ If OTHER-SOURCE is 2, get keyword from `kill-ring'."
 (setq vc-make-backup-files nil)
 ;; }}
 
-;; {{ tramp setup
-(add-to-list 'backup-directory-alist
-             (cons tramp-file-name-regexp nil))
-(setq tramp-chunksize 8192)
+(with-eval-after-load 'tramp
+  (push (cons tramp-file-name-regexp nil) backup-directory-alist)
 
 ;; @see https://github.com/syl20bnr/spacemacs/issues/1921
 ;; If you tramp is hanging, you can uncomment below line.
 ;; (setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")
-;; }}
+
+  (setq tramp-chunksize 8192))
+
 
 ;; {{ GUI frames
 ;; Suppress GUI features
@@ -239,17 +241,17 @@ If OTHER-SOURCE is 2, get keyword from `kill-ring'."
 ;; Show a marker in the left fringe for lines not in the buffer
 (setq indicate-empty-lines t)
 
-;; NO tool bar, scroll-bar
-(when window-system
-  (and (fboundp 'scroll-bar-mode) (not (eq scroll-bar-mode -1))
-       (scroll-bar-mode -1))
-  (and (fboundp 'tool-bar-mode) (not (eq tool-bar-mode -1))
-       (tool-bar-mode -1))
-  (and (fboundp 'horizontal-scroll-bar-mode)
-       (horizontal-scroll-bar-mode -1)))
-;; no menu bar
-(and (fboundp 'menu-bar-mode) (not (eq menu-bar-mode -1))
-     (menu-bar-mode -1))
+(defun my-mini-ui ()
+  "Minimum ui."
+  ;; NO tool bar, scroll-bar
+  (when window-system
+    (scroll-bar-mode -1)
+    (tool-bar-mode -1)
+    (horizontal-scroll-bar-mode -1)))
+(run-with-idle-timer 2 nil #'my-mini-ui)
 ;; }}
+
+;; no menu bar
+(menu-bar-mode -1)
 
 (provide 'init-essential)
