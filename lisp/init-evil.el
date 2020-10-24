@@ -344,8 +344,7 @@ If the character before and after CH is space or tab, CH is NOT slash"
       ;; if imenu is available, try it
       (cond
        ((and (derived-mode-p 'js2-mode)
-             (or (null (get-text-property (point) 'face))
-                 (font-belongs-to (point) '(rjsx-tag))))
+             (cl-intersection (my-what-face) '(rjsx-tag)))
         (js2-jump-to-definition))
        ((fboundp 'imenu--make-index-alist)
         (condition-case nil
@@ -473,26 +472,21 @@ If the character before and after CH is space or tab, CH is NOT slash"
 ;; }}
 
 ;; {{ I select string inside single quote frequently
-(defun my-single-or-double-quote-range (count beg end type inclusive)
+(defun my-text-obj-similar-font (count beg end type inclusive)
   "Get maximum range of single or double quote text object.
 If INCLUSIVE is t, the text object is inclusive."
-  (let* ((s-range (evil-select-quote ?' beg end type count inclusive))
-         (d-range (evil-select-quote ?\" beg end type count inclusive))
-         (beg (min (nth 0 s-range) (nth 0 d-range)))
-         (end (max (nth 1 s-range) (nth 1 d-range))))
-    (setf (nth 0 s-range) beg)
-    (setf (nth 1 s-range) end)
-    s-range))
+  (let* ((range (my-create-range inclusive)))
+    (evil-range (car range) (cdr range) inclusive)))
 
 (evil-define-text-object my-evil-a-single-or-double-quote (count &optional beg end type)
   "Select a single-quoted expression."
   :extend-selection t
-  (my-single-or-double-quote-range count beg end type t))
+  (my-text-obj-similar-font count beg end type t))
 
 (evil-define-text-object my-evil-inner-single-or-double-quote (count &optional beg end type)
   "Select 'inner' single-quoted expression."
   :extend-selection nil
-  (my-single-or-double-quote-range count beg end type nil))
+  (my-text-obj-similar-font count beg end type nil))
 
 (define-key evil-outer-text-objects-map "i" #'my-evil-a-single-or-double-quote)
 (define-key evil-inner-text-objects-map "i" #'my-evil-inner-single-or-double-quote)
@@ -530,8 +524,8 @@ If INCLUSIVE is t, the text object is inclusive."
   "af" 'ace-maximize-window
   "ac" 'aya-create
   "pp" 'paste-from-x-clipboard ; used frequently
-  "bs" '(lambda () (interactive) (goto-edge-by-comparing-font-face -1))
-  "es" 'goto-edge-by-comparing-font-face
+  "bs" '(lambda () (interactive) (goto-char (car (my-create-range t))))
+  "es" '(lambda () (interactive) (goto-char (1- (cdr (my-create-range t)))))
   "vj" 'my-validate-json-or-js-expression
   "kc" 'kill-ring-to-clipboard
   "fn" 'cp-filename-of-current-buffer
@@ -565,8 +559,6 @@ If INCLUSIVE is t, the text object is inclusive."
   "rv" 'my-rename-thing-at-point
   "rb" 'evilmr-replace-in-buffer
   "ts" 'evilmr-tag-selected-region ;; recommended
-  "cby" 'cb-switch-between-controller-and-view
-  "cbu" 'cb-get-url-from-controller
   "rt" 'counsel-etags-recent-tag
   "ft" 'counsel-etags-find-tag
   "yy" 'counsel-browse-kill-ring
@@ -906,27 +898,6 @@ If INCLUSIVE is t, the text object is inclusive."
 
 ;; {{ Evil’s f/F/t/T command can search PinYin ,
 (run-with-idle-timer 4 nil #'evil-find-char-pinyin-mode)
-;; }}
-
-;; {{ Port of vim-textobj-syntax.
-;; It provides evil text objects for consecutive items with same syntax highlight.
-;; press "vah" or "vih"
-(require 'evil-textobj-syntax)
-;; }}
-
-;; {{ evil-args
-;; bind evil-args text objects
-(define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
-(define-key evil-outer-text-objects-map "a" 'evil-outer-arg)
-
-;; bind evil-forward/backward-args
-(define-key evil-normal-state-map "L" 'evil-forward-arg)
-(define-key evil-normal-state-map "H" 'evil-backward-arg)
-(define-key evil-motion-state-map "L" 'evil-forward-arg)
-(define-key evil-motion-state-map "H" 'evil-backward-arg)
-
-;; bind evil-jump-out-args
-(define-key evil-normal-state-map "K" 'evil-jump-out-args)
 ;; }}
 
 ;; ;; In insert mode, press "fg" in 0.3 second to trigger my-counsel-company
