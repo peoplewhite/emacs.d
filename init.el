@@ -48,18 +48,6 @@
 
 (defconst my-lisp-dir (concat my-emacs-d "lisp")
   "Directory of lisp.")
-
-;; @see https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_noticeably_slower_than_245_on_windows/
-;; Emacs 25 does gc too frequently
-(when *emacs25*
-  ;; (setq garbage-collection-messages t) ; for debug
-  (setq best-gc-cons-threshold (* 64 1024 1024))
-  (setq gc-cons-percentage 0.5)
-
-  (run-with-idle-timer 5 t #'garbage-collect))
-
-=======
->>>>>>> 02a5680d082375e6ef4c7c93bac2e19d2b2e66a8
 (defun my-vc-merge-p ()
   "Use Emacs for git merge only?"
   (boundp 'startup-now))
