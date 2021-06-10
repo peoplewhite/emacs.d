@@ -179,3 +179,23 @@
 ;;; no-byte-compile: t
 ;;; End:
 (put 'erase-buffer 'disabled nil)
+
+;;; kimura's config
+;; set theme
+(load-theme 'atom-one-dark)
+
+;; set default font
+;; (set-face-attribute 'default nil
+;;                     :family "JetBrains Mono"
+;;                     :height 160)
+(set-frame-font "JetBrains Mono-14" t t)
+
+(defun my-open-init-file ()
+  "Open the init file."
+  (interactive)
+  (find-file user-init-file))
+
+(defun my-worklog ()
+  "Open my worklog file."
+  (interactive)
+  (find-file "~/Dropbox/orgModeNote/WorkLog.org"))
