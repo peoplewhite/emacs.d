@@ -25,6 +25,8 @@
   (add-hook 'org-clock-in-hook 'sanityinc/show-org-clock-in-header-line)
   (add-hook 'org-clock-out-hook 'sanityinc/hide-org-clock-from-header-line)
   (add-hook 'org-clock-cancel-hook 'sanityinc/hide-org-clock-from-header-line)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))) ;; kimura
+
 
   (define-key org-clock-mode-line-map [header-line mouse-2] 'org-clock-goto)
   (define-key org-clock-mode-line-map [header-line mouse-1] 'org-clock-menu))
@@ -77,6 +79,7 @@
     ;; display wrapped lines instead of truncated lines
     (setq truncate-lines nil)
     (setq word-wrap t)))
+
 (add-hook 'org-mode-hook 'org-mode-hook-setup)
 
 (defvar my-pdf-view-from-history nil
@@ -232,5 +235,8 @@ skip user's own code in `org-mode-hook'."
         org-imenu-depth 9
         ;; @see http://irreal.org/blog/1
         org-src-fontify-natively t))
+
+;; kimura -> org-bullets-mode
+;;(setq org-bullets-mode t)
 
 (provide 'init-org)

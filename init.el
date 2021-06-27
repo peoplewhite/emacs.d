@@ -49,7 +49,6 @@
 
 (defconst my-lisp-dir (concat my-emacs-d "lisp")
   "Directory of lisp.")
-
 (defun my-vc-merge-p ()
   "Use Emacs for git merge only?"
   (boundp 'startup-now))
@@ -120,6 +119,7 @@
   (require-init 'init-keyfreq t)
   (require-init 'init-httpd t)
 
+
   ;; projectile costs 7% startup time
 
   ;; don't play with color-theme in light weight mode
@@ -181,16 +181,14 @@
 (put 'erase-buffer 'disabled nil)
 
 ;;; kimura's config
-;; set theme
-(load-theme 'atom-one-dark)
-
 ;; set default font
 ;; (set-face-attribute 'default nil
 ;;                     :family "JetBrains Mono"
 ;;                     :height 160)
-(set-frame-font "JetBrains Mono-14" t t)
+;; (set-frame-font "JetBrains Mono-14" t t)
+(set-frame-font "MesloLGS Nerd Font Mono 14" nil t)
 
-(defun my-open-init-file ()
+(defun my-init-file ()
   "Open the init file."
   (interactive)
   (find-file user-init-file))
@@ -199,3 +197,36 @@
   "Open my worklog file."
   (interactive)
   (find-file "~/Dropbox/orgModeNote/WorkLog.org"))
+;; kimura custom -----------------------------------------------------------
+;; setup theme
+
+(setq modus-operandi-theme-slanted-constructs t
+      modus-operandi-theme-bold-constructs t
+      modus-operandi-theme-fringes 'subtle ; {nil,'subtle,'intense}
+      modus-operandi-theme-3d-modeline t
+      modus-operandi-theme-faint-syntax t
+      modus-operandi-theme-intense-hl-line t
+      modus-operandi-theme-intense-paren-match t
+      modus-operandi-theme-prompts 'subtle ; {nil,'subtle,'intense}
+      modus-operandi-theme-completions 'moderate ; {nil,'moderate,'opinionated}
+      modus-operandi-theme-diffs 'desaturated ; {nil,'desaturated,'fg-only}
+      modus-operandi-theme-org-blocks 'greyscale ; {nil,'greyscale,'rainbow}
+      modus-operandi-theme-variable-pitch-headings t
+      modus-operandi-theme-rainbow-headings t
+      modus-operandi-theme-section-headings t
+      modus-operandi-theme-scale-headings t
+      modus-operandi-theme-scale-1 1.05
+      modus-operandi-theme-scale-2 1.1
+      modus-operandi-theme-scale-3 1.15
+      modus-operandi-theme-scale-4 1.2
+      modus-operandi-theme-scale-5 1.3)
+(load-theme 'modus-vivendi t)
+
+;; set theme
+(load-theme 'atom-one-dark)
+
+
+;; setup slime
+;;(setq inferior-lisp-program "/usr/local/bin/sbcl")
+;; (setq slime-contribs '(slime-fancy))
+;; (require 'slime-autoloads)
